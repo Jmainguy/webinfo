@@ -66,9 +66,14 @@
         <div id="onlineStatus" class="text-sm text-gray-600 dark:text-gray-300"></div>
       </div>
       <!-- Clipboard -->
-      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
-        <div class="font-semibold">Clipboard</div>
-        <div id="clipboard" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow flex items-center">
+        <div>
+          <div class="font-semibold">Clipboard</div>
+          <div id="clipboard" class="text-sm text-gray-600 dark:text-gray-300"></div>
+        </div>
+        <button id="clipboardPermBtn" class="ml-auto px-2 py-1 rounded bg-blue-600 text-white text-xs font-semibold shadow hover:bg-blue-700">
+          Request Clipboard Access
+        </button>
       </div>
       <!-- Contacts -->
       <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
@@ -116,10 +121,13 @@
         <div id="displayMode" class="text-sm text-gray-600 dark:text-gray-300"></div>
       </div>
     </div>
-    <!-- Place the map at the very bottom, full width -->
+    <!-- Place the location at the very bottom -->
     <div class="mt-8">
       <div class="font-semibold mb-2">Location</div>
-      <div id="locationMap" class="w-full h-64 rounded" style="min-height: 256px;"></div>
+      <div id="location" class="w-full h-12 rounded bg-white dark:bg-gray-800 flex items-center px-4 text-gray-700 dark:text-gray-200"></div>
+      <button id="locationPermBtn" class="mt-2 px-3 py-1 rounded bg-blue-600 text-white text-xs font-semibold shadow hover:bg-blue-700">
+        Request Location Access
+      </button>
     </div>
   </div>
   <style>
@@ -164,54 +172,6 @@
         .catch(err => {
           console.error("Failed to load WebAssembly:", err);
         });
-
-      window.showMap = function(lat, lon) {
-        var mapDiv = document.getElementById('locationMap');
-        if (!lat || !lon) {
-          mapDiv.innerHTML = '<span class="text-red-500">Location unavailable</span>';
-          return;
-        }
-        // Remove any previous map instance
-        if (window._maplibreMap) {
-          window._maplibreMap.remove();
-          window._maplibreMap = null;
-        }
-        mapDiv.innerHTML = ""; // Clear previous content
-
-        var map = new maplibregl.Map({
-          container: 'locationMap',
-          style: {
-            version: 8,
-            sources: {
-              osm: {
-                type: 'raster',
-                tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-                tileSize: 256,
-                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
-              }
-            },
-            layers: [
-              {
-                id: 'osm',
-                type: 'raster',
-                source: 'osm',
-                minzoom: 0,
-                maxzoom: 19
-              }
-            ]
-          },
-          center: [lon, lat],
-          zoom: 13,
-          attributionControl: true
-        });
-
-        // Add marker
-        var marker = new maplibregl.Marker()
-          .setLngLat([lon, lat])
-          .setPopup(new maplibregl.Popup().setText("You are around here: " + lat.toFixed(5) + ", " + lon.toFixed(5)))
-          .addTo(map);
-        marker.togglePopup();
-      };
     });
   </script>
 </body>
