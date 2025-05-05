@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Go WASM Dashboard++</title>
+  <script src="wasm_exec.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white p-8 transition-all">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex flex-col items-center mb-6">
+      <h1 class="text-3xl font-bold">Client Info Dashboard ++</h1>
+      <!-- Digital clock below the title, styled like a digital desk clock -->
+      <div id="clock" class="mt-4 mb-2 px-8 py-4 rounded-lg shadow-lg bg-gray-900 text-green-400 font-mono text-4xl tracking-widest border-4 border-green-700 digital-clock">
+        <!-- time will be injected here -->
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">User Agent</div>
+        <div id="userAgent" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Language</div>
+        <div id="language" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Platform</div>
+        <div id="platform" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Timezone</div>
+        <div id="timezone" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Screen Size</div>
+        <div id="screenSize" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">GPU</div>
+        <div id="gpu" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Connection Type</div>
+        <div id="connection" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Device Memory</div>
+        <div id="deviceMemory" class="text-sm text-gray-600 dark:text-gray-300" title="Rounded down for privacy, not actual RAM"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">CPU Cores</div>
+        <div id="cpuCores" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Cookies Enabled</div>
+        <div id="cookiesEnabled" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Cookies</div>
+        <div id="cookies" class="text-sm text-gray-600 dark:text-gray-300 break-all"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Online Status</div>
+        <div id="onlineStatus" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <!-- Clipboard -->
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Clipboard</div>
+        <div id="clipboard" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <!-- Contacts -->
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Contacts</div>
+        <div id="contacts" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <!-- Camera -->
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow flex flex-col items-center">
+        <div class="font-semibold mb-2">Camera</div>
+        <video id="cameraVideo" width="160" height="120" class="rounded border border-gray-400 dark:border-gray-600 bg-black"
+          autoplay playsinline muted></video>
+        <div id="cameraStatus" class="text-xs text-gray-500 mt-1"></div>
+        <button id="cameraStartBtn" class="mt-2 px-3 py-1 rounded bg-green-600 text-white text-xs font-semibold shadow hover:bg-green-700 hidden">
+          Start Camera
+        </button>
+      </div>
+      <!-- Microphone -->
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow flex flex-col items-center">
+        <div class="font-semibold mb-2">Microphone</div>
+        <input id="micVolume" type="range" min="0" max="100" value="0" disabled class="w-full accent-green-500">
+        <div id="micStatus" class="text-xs text-gray-500 mt-1"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Browser</div>
+        <div id="browser" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Battery</div>
+        <div id="battery" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Preferred Color Scheme</div>
+        <div id="preferredColorScheme" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Touch Support</div>
+        <div id="touchSupport" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Window Size</div>
+        <div id="windowSize" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <div class="font-semibold">Display Mode</div>
+        <div id="displayMode" class="text-sm text-gray-600 dark:text-gray-300"></div>
+      </div>
+    </div>
+    <!-- Place the map at the very bottom, full width -->
+    <div class="mt-8">
+      <div class="font-semibold mb-2">Location</div>
+      <div id="locationMap" class="w-full h-64 rounded" style="min-height: 256px;"></div>
+    </div>
+  </div>
+  <style>
+    /* Digital clock "on a desk" look */
+    .digital-clock {
+      box-shadow: 0 8px 24px 0 rgba(0,0,0,0.25), 0 1.5px 0 0 #333 inset;
+      background: linear-gradient(180deg, #222 80%, #444 100%);
+      border-radius: 1rem;
+      border-bottom: 8px solid #222;
+      font-family: 'Share Tech Mono', 'Fira Mono', 'Menlo', 'monospace';
+      letter-spacing: 0.15em;
+      text-shadow: 0 0 8px #39ff14, 0 0 2px #39ff14;
+    }
+    #locationMap .maplibregl-canvas {
+      border-radius: 0.5rem;
+    }
+  </style>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      if (typeof Go === "undefined") {
+        console.error("Go WASM runtime (wasm_exec.js) not loaded.");
+        return;
+      }
+      const go = new Go();
+      if (!WebAssembly.instantiateStreaming) { // Polyfill for Safari
+        WebAssembly.instantiateStreaming = async (resp, importObject) => {
+          const source = await (await resp).arrayBuffer();
+          return await WebAssembly.instantiate(source, importObject);
+        };
+      }
+      fetch("main.wasm")
+        .then(response => {
+          if (response.headers.get("Content-Type") !== "application/wasm") {
+            throw new Error("Incorrect MIME type for WebAssembly file. Expected 'application/wasm'.");
+          }
+          return WebAssembly.instantiateStreaming(response, go.importObject);
+        })
+        .then(result => {
+          go.run(result.instance);
+        })
+        .catch(err => {
+          console.error("Failed to load WebAssembly:", err);
+        });
+
+      window.showMap = function(lat, lon) {
+        var mapDiv = document.getElementById('locationMap');
+        if (!lat || !lon) {
+          mapDiv.innerHTML = '<span class="text-red-500">Location unavailable</span>';
+          return;
+        }
+        // Remove any previous map instance
+        if (window._maplibreMap) {
+          window._maplibreMap.remove();
+          window._maplibreMap = null;
+        }
+        mapDiv.innerHTML = ""; // Clear previous content
+
+        var map = new maplibregl.Map({
+          container: 'locationMap',
+          style: {
+            version: 8,
+            sources: {
+              osm: {
+                type: 'raster',
+                tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+                tileSize: 256,
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+              }
+            },
+            layers: [
+              {
+                id: 'osm',
+                type: 'raster',
+                source: 'osm',
+                minzoom: 0,
+                maxzoom: 19
+              }
+            ]
+          },
+          center: [lon, lat],
+          zoom: 13,
+          attributionControl: true
+        });
+
+        // Add marker
+        var marker = new maplibregl.Marker()
+          .setLngLat([lon, lat])
+          .setPopup(new maplibregl.Popup().setText("You are around here: " + lat.toFixed(5) + ", " + lon.toFixed(5)))
+          .addTo(map);
+        marker.togglePopup();
+      };
+    });
+  </script>
+</body>
+</html>

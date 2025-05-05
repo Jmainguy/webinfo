@@ -1,0 +1,21 @@
+# Ignore Go binaries
+server/server
+wasm/main.wasm
+
+# Ignore build artifacts
+*.exe
+*.out
+*.test
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore editor/project files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore Docker build cache
+*.tar
